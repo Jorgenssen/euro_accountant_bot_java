@@ -1,0 +1,71 @@
+buildscript {
+    ext {
+        springBootVersion = "2.2.2.RELEASE"
+        springContextVersion = "2.0.5"
+        springTelegrambotVersion = "4.1.2"
+        log4jVersion = "2.12.1"
+        mongoDbDriverVersion = "3.12.1"
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}",
+                "org.springframework:spring-context:${springContextVersion}",
+                "org.telegram:telegrambots-spring-boot-starter:${springTelegrambotVersion}",
+                "org.apache.logging.log4j:log4j-core:${log4jVersion}",
+                "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+        )
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'war'
+apply plugin: 'application'
+
+mainClassName = 'com.euroaccountant.ApplicationMainClass'
+group = 'com.euroaccountant'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'FatJarBot',
+                'Implementation-Version': version,
+                'Main-Class': mainClassName
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot",
+            "org.springframework.boot:spring-boot-starter-web",
+            "org.springframework.boot:spring-boot-starter-security",
+            "org.apache.logging.log4j:log4j-api",
+            "org.apache.logging.log4j:log4j-core",
+            "org.telegram:telegrambots-spring-boot-starter:${springTelegrambotVersion}")
+    developmentOnly('org.springframework.boot:spring-boot-devtools')
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
