@@ -1,16 +1,24 @@
 package com.euroaccountant.services;
 
 import com.euroaccountant.utils.RequestResponseLoggingInterceptor;
+import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.PostConstruct;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,9 +27,8 @@ import java.util.List;
 @Component
 public class ExchangeService {
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    @Autowired
     @Value("${bot.currenciesBaseURI}")
     private String currenciesBaseURI;
 
@@ -31,18 +38,21 @@ public class ExchangeService {
         restTemplate.setInterceptors(Collections.singletonList(new RequestResponseLoggingInterceptor()));
     }
 
+    private UriComponentsBuilder preBuildURI() {
+        return UriComponentsBuilder.fromUriString(currenciesBaseURI);
+    }
+
     private JSONObject getRates(){
-        return new JSONObject(restTemplate.getForObject(currenciesBaseURI, String.class)).getJSONObject("rates");
+        return new JSONObject(restTemplate.getForObject(preBuildURI().build().toUri(), String.class)).getJSONObject("rates");
     }
 
     private JSONObject getBaseRates(String currency) {
-        return new JSONObject(restTemplate.getForObject(currenciesBaseURI + "?base=" + currency, String.class)).getJSONObject("rates");
+        URI uri = preBuildURI().queryParam("base", currency).build().toUri();
+        return new JSONObject(restTemplate.getForObject(uri, String.class)).getJSONObject("rates");
     }
 
     public List<String> getCurrenciesList() {
-        List<String> currenciesList = new ArrayList<>();
-        currenciesList.addAll(getRates().keySet());
-        return currenciesList;
+        return new ArrayList<>(getRates().keySet());
     }
 
     public double getCurrency(String currency) {

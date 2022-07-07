@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class RoundHelper {
+
+    private RoundHelper() {}
+
     public static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
 
