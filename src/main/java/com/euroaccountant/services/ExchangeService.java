@@ -24,10 +24,10 @@ public class ExchangeService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${bot.currenciesBaseURI}")
-    private String currenciesBaseURI;
+    private final String currenciesBaseURI;
 
-    public ExchangeService() {
+    public ExchangeService(@Value("${bot.currenciesBaseURI}") String currenciesBaseURI) {
+        this.currenciesBaseURI = currenciesBaseURI;
         ClientHttpRequestFactory factory = new BufferingClientHttpRequestFactory(new SimpleClientHttpRequestFactory());
         this.restTemplate = new RestTemplate(factory);
         restTemplate.setInterceptors(Collections.singletonList(new RequestResponseLoggingInterceptor()));
