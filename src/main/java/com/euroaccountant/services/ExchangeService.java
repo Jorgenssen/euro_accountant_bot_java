@@ -20,6 +20,8 @@ import java.util.List;
 @Component
 public class ExchangeService {
 
+    private static final String BASE_CURRENCY = "EUR";
+
     private final RestTemplate restTemplate;
 
     @Value("${bot.currenciesBaseURI}")
@@ -53,6 +55,6 @@ public class ExchangeService {
     }
 
     public double getBaseCurrency(String currency) {
-        return (Double) getBaseRates(currency).get("EUR");
+        return (Double) getBaseRates(currency).get(BASE_CURRENCY);
     }
 }
