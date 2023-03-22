@@ -3,17 +3,15 @@ package com.euroaccountant;
 import com.euroaccountant.helpers.NumericHelper;
 import com.euroaccountant.helpers.RoundHelper;
 import com.euroaccountant.services.ExchangeService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import java.util.Arrays;
 
@@ -27,14 +25,15 @@ public class EuroAccountantBot extends TelegramLongPollingBot {
 
     private String currency;
 
-    @Lazy
-    @Autowired
-    private ExchangeService exchangeService;
+    private final ExchangeService exchangeService;
 
     @Autowired
-    public EuroAccountantBot(@Value("${bot.botUsername}") String botUsername, @Value("${bot.token}") String token) {
+    public EuroAccountantBot(@Value("${bot.botUsername}") String botUsername,
+                             @Value("${bot.token}") String token,
+                             ExchangeService exchangeService) {
         this.botUsername = botUsername;
         this.token = token;
+        this.exchangeService = exchangeService;
     }
 
     @Override
